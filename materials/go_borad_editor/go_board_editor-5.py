@@ -23,21 +23,18 @@ class GoBoardApp:
         
         canvas_total_size = self.cell_size * (self.size - 1) + 2 * self.padding
 
+        # --- 変更点(1): Pillowでメモリ上に画像を作成 ---
         self.board_image = Image.new("RGB", (canvas_total_size, canvas_total_size), "#D1B48C")
         self.drawer = ImageDraw.Draw(self.board_image)
-        self.photo_image = None
+        self.photo_image = None # Tkinter表示用の画像オブジェクト
 
         # --- GUIコンポーネント ---
         self.stone_color_var = tk.IntVar(value=1)
-        
-        # --- 変更点(1): ラジオボタンの選択肢を追加 ---
         control_frame = tk.Frame(self.root)
         control_frame.pack(pady=5)
-        tk.Radiobutton(control_frame, text="黒石", variable=self.stone_color_var, value=1).pack(side=tk.LEFT)
-        tk.Radiobutton(control_frame, text="白石", variable=self.stone_color_var, value=-1).pack(side=tk.LEFT)
-        tk.Radiobutton(control_frame, text="黒専用点", variable=self.stone_color_var, value=2).pack(side=tk.LEFT)
-        tk.Radiobutton(control_frame, text="白専用点", variable=self.stone_color_var, value=-2).pack(side=tk.LEFT)
-        tk.Radiobutton(control_frame, text="消去", variable=self.stone_color_var, value=0).pack(side=tk.LEFT)
+        tk.Radiobutton(control_frame, text="黒を置く", variable=self.stone_color_var, value=1).pack(side=tk.LEFT)
+        tk.Radiobutton(control_frame, text="白を置く", variable=self.stone_color_var, value=-1).pack(side=tk.LEFT)
+        tk.Radiobutton(control_frame, text="消去する", variable=self.stone_color_var, value=0).pack(side=tk.LEFT)
         
         self.canvas = tk.Canvas(self.root, width=canvas_total_size, height=canvas_total_size)
         self.canvas.pack()
@@ -52,9 +49,12 @@ class GoBoardApp:
         self.draw_board()
 
     def draw_board(self):
-        """メモリ上の画像に盤面、石、専用点を描画し、キャンバスに表示する"""
+        """メモリ上の画像に盤面と石を描画し、キャンバスに表示する"""
+        # --- 変更点(2): 描画先をPillowのImageDrawオブジェクトに変更 ---
+        # 背景を描画
         self.drawer.rectangle([0, 0, self.board_image.width, self.board_image.height], fill="#D1B48C")
 
+        # 格子線の描画
         start = self.padding
         end = self.cell_size * (self.size - 1) + self.padding
         for i in range(self.size):
@@ -62,24 +62,18 @@ class GoBoardApp:
             self.drawer.line([(start, pos), (end, pos)], fill="black")
             self.drawer.line([(pos, start), (pos, end)], fill="black")
 
+        # 石の描画
         for r in range(self.size):
             for c in range(self.size):
-                point_data = self.board_data[r][c]
-                x = self.padding + c * self.cell_size
-                y = self.padding + r * self.cell_size
-
-                # --- 変更点(2): 描画ロジックを拡張 ---
-                if point_data == 1 or point_data == -1: # 石の描画
-                    color = "black" if point_data == 1 else "white"
+                stone = self.board_data[r][c]
+                if stone != 0:
+                    x = self.padding + c * self.cell_size
+                    y = self.padding + r * self.cell_size
+                    color = "black" if stone == 1 else "white"
                     bbox = (x - self.stone_radius, y - self.stone_radius, x + self.stone_radius, y + self.stone_radius)
                     self.drawer.ellipse(bbox, fill=color, outline="black")
-                
-                elif point_data == 2 or point_data == -2: # 専用点の描画
-                    marker_size = 6 # マーカーの半分のサイズ
-                    color = "black" if point_data == 2 else "white"
-                    bbox = (x - marker_size, y - marker_size, x + marker_size, y + marker_size)
-                    self.drawer.rectangle(bbox, fill=color, outline="black")
 
+        # Pillow ImageをTkinter用のPhotoImageに変換してキャンバスに表示
         self.photo_image = ImageTk.PhotoImage(self.board_image)
         self.canvas.create_image(0, 0, anchor=tk.NW, image=self.photo_image)
 
@@ -106,12 +100,15 @@ class GoBoardApp:
         except Exception as e:
             print(f"エラーが発生しました: {e}")
 
+    # --- 変更点(3): PNG保存処理をシンプル化 ---
     def save_to_png(self):
+        """メモリ上の画像を直接PNGファイルに保存する"""
         filename = filedialog.asksaveasfilename(
             title="PNG画像として保存", defaultextension=".png", filetypes=[("PNG files", "*.png")]
         )
         if not filename: return
         try:
+            # メモリ上の画像を直接保存
             self.board_image.save(filename)
             print(f"盤面画像を {filename} に保存しました。")
         except Exception as e:
@@ -152,4 +149,3 @@ if __name__ == "__main__":
         main_root.mainloop()
     else:
         print("サイズが選択されなかったので終了します。")
-
