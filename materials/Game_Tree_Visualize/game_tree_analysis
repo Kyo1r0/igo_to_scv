@@ -1,0 +1,22 @@
+// Go Game Tree Analysis
+digraph {
+	bgcolor=lightgray fontsize=20 label="Game Tree Analysis" rankdir=TB
+	node [fillcolor=white style=filled]
+	subgraph cluster_black {
+		graph [color=whitesmoke fontsize=16 label="Black to Play First" style=filled]
+		f9d546eed8 [label="" image="game_tree_nodes\f9d546eed8.png" shape=box]
+		f9d546eed8 -> "2e62bd164a" [color=black]
+		"2e62bd164a" [label="" image="game_tree_nodes\2e62bd164a.png" shape=box]
+		"2e62bd164a" -> "217c95f7d2" [color=gray]
+		"217c95f7d2" [label="" image="game_tree_nodes\217c95f7d2.png" shape=box]
+	}
+	subgraph cluster_white {
+		graph [color=lightgoldenrodyellow fontsize=16 label="White to Play First" style=filled]
+		c2d266cadf [label="" image="game_tree_nodes\c2d266cadf.png" shape=box]
+		c2d266cadf -> "155729316e" [color=gray]
+		"155729316e" [label="" image="game_tree_nodes\155729316e.png" shape=box]
+		"155729316e" -> "5da0dc7b29" [color=black]
+		"5da0dc7b29" [label="" image="game_tree_nodes\5da0dc7b29.png" shape=box]
+	}
+	f9d546eed8 -> c2d266cadf [style=invis]
+}
