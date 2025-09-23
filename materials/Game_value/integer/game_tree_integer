@@ -1,0 +1,7 @@
+// Integer Game Value Tree
+digraph {
+	rankdir=TB
+	"685f40131e" [label="Value: -1"]
+	"685f40131e" -> "4f80a4a3d4" [color=gray]
+	"4f80a4a3d4" [label="Value: 0"]
+}
